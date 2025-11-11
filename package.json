@@ -1,0 +1,26 @@
+{
+  "name": "jaw-3d-viewer",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "npm:rolldown-vite@7.1.14"
+  },
+  "overrides": {
+    "vite": "npm:rolldown-vite@7.1.14"
+  },
+  "dependencies": {
+    "@itk-wasm/image-io": "^1.6.0",
+    "@kitware/vtk.js": "^34.13.1",
+    "itk-wasm": "^1.0.0-b.196",
+    "lil-gui": "^0.20.0",
+    "regenerator-runtime": "^0.14.1",
+    "three": "^0.180.0",
+    "vtk.js": "^34.13.1"
+  }
+}
