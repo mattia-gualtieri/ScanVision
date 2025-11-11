@@ -232,7 +232,7 @@ function filterLabels(selectedLabels) {
 
 
 
-
+// Custom anatomical grouping function
 
 function anatomicalGroupsCustom(uniqueLabels) {
   const groups = {
@@ -308,7 +308,7 @@ function setupCamera(volumeDims, renderer) {
   camera.position.set(center.x + offset, center.y - offset*1.5, center.z + offset);
   camera.up.set(1, 0, 0); 
   camera.lookAt(center.x, center.y, center.z);
-
+  
   const controls = new OrbitControls(camera, renderer.domElement);
   controls.target.set(center.x, center.y, center.z);
   controls.enableDamping = false;
