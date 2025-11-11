@@ -232,7 +232,7 @@ function filterLabels(selectedLabels) {
 
 
 
-// Custom anatomical grouping function
+
 
 function anatomicalGroupsCustom(uniqueLabels) {
   const groups = {
