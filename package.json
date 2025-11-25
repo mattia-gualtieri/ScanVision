@@ -17,6 +17,7 @@
   "dependencies": {
     "@itk-wasm/image-io": "^1.6.0",
     "@kitware/vtk.js": "^34.13.1",
+    "isosurface": "^1.0.0",
     "itk-wasm": "^1.0.0-b.196",
     "lil-gui": "^0.20.0",
     "regenerator-runtime": "^0.14.1",

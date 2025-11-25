@@ -3,7 +3,9 @@ import{ OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import {GUI} from 'lil-gui';
 import {loadVolume} from './loaders/VolumeLoaders.js';
 import { loadLabel } from './loaders/VolumeLoaders.js';
-import { VolumeRenderShader1 } from 'three/examples/jsm/Addons.js';
+import { VolumeRenderShader1 } from './shader/VolumeShaders.js';
+import { buildMeshFromBinaryVolume, createMeshFromGeometry } from './utils/labelToMesh.js';
+
 
 
 //Scene
@@ -51,7 +53,10 @@ const customShader = {
   vertexShader: VolumeRenderShader1.vertexShader,
   fragmentShader: VolumeRenderShader1.fragmentShader.replace(
     'const int MAX_STEPS = 887;',
-    'const int MAX_STEPS = 444;' 
+    'const int MAX_STEPS = 500;' 
+  ).replace(
+    'const int REFINEMENT_STEPS = 4;',
+    'const int REFINEMENT_STEPS = 1;' 
   )
 };
 
@@ -124,6 +129,9 @@ const labelBox = new THREE.Mesh(geometryLabelBox, labelMaterial);
 labelBox.scale.set(spacingL[0]*-1, spacingL[1], spacingL[2]);
 labelBox.translateOnAxis(new THREE.Vector3(1, 0, 0), sizeL[0]);
 
+
+
+
 scene.add(labelBox);
 
 
@@ -154,57 +162,19 @@ function updateLabelSelection() {
   }
   const selectedArray = Array.from(selectedSet);
 
-  let filtered;
   if (selectedArray.length === 0) {
-    filtered = new Uint8Array(dataLOriginal.length); 
+    // nessuna label selezionata: nascondi tutte le mesh e il volume labels
+    hideAllLabelMeshes();
+    labelBox.visible = false;
+    // (opzionale) se vuoi mostrare il volume labels come fallback:
+    // labelBox.visible = true;
   } else {
-    filtered = filterLabels(selectedArray);
+    // usa le mesh (async, cached). Nasconde il volume labels per evitare doppio ray‑marching.
+    labelBox.visible = false;
+    hideAllLabelMeshes();
+    showSelectedLabelMeshes(selectedArray); // non await: costruzione in background
   }
-
-  textureL.image.data.set(filtered);
-  textureL.needsUpdate = true;
-  labelBox.visible = selectedArray.length > 0;
 }
-
-
-gui.add(uniforms['u_renderthreshold'], 'value', 0.0, 1.0).step(0.01).name('Render Style').onChange(function (value) {
-  uniforms['u_renderthreshold'].value = value;
-});
-
-
-gui.add(params, 'showRawVolume').name('RAW Volume').onChange((value) => {
-  box.visible = value;
-});
-
-
-const controllers = {};
-groupNames.forEach(groupName => {
-  controllers[groupName] = gui.add(params, groupName).name(groupName).onChange(() => {
-    updateLabelSelection();
-  });
-});
-
-
-const actions = {
-  toggleAll: () => {
-    const anyOff = groupNames.some(n => !params[n]);
-    groupNames.forEach(n => {
-      params[n] = anyOff;
-      if (controllers[n]) controllers[n].setValue(anyOff);
-      const dom = controllers[n]?.domElement;
-      if (dom) {
-        const input = dom.querySelector('input[type="checkbox"]');
-        if (input) input.checked = anyOff;
-      }
-    });
-    updateLabelSelection();
-  }
-};
-
-const actionControllers = {};
-actionControllers.toggleAll = gui.add(actions, 'toggleAll').name('Select / Deselect All');
-
-
 
 
 function animate() {
@@ -319,3 +289,4 @@ function setupCamera(volumeDims, renderer) {
 
   return { camera, controls, frustumSize };
 }
+
