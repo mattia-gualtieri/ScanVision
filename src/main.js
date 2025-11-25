@@ -4,8 +4,6 @@ import {GUI} from 'lil-gui';
 import {loadVolume} from './loaders/VolumeLoaders.js';
 import { loadLabel } from './loaders/VolumeLoaders.js';
 import { VolumeRenderShader1 } from './shader/VolumeShaders.js';
-import { buildMeshFromBinaryVolume, createMeshFromGeometry } from './utils/labelToMesh.js';
-
 
 
 //Scene
@@ -162,19 +160,57 @@ function updateLabelSelection() {
   }
   const selectedArray = Array.from(selectedSet);
 
+  let filtered;
   if (selectedArray.length === 0) {
-    // nessuna label selezionata: nascondi tutte le mesh e il volume labels
-    hideAllLabelMeshes();
-    labelBox.visible = false;
-    // (opzionale) se vuoi mostrare il volume labels come fallback:
-    // labelBox.visible = true;
+    filtered = new Uint8Array(dataLOriginal.length); 
   } else {
-    // usa le mesh (async, cached). Nasconde il volume labels per evitare doppio ray‑marching.
-    labelBox.visible = false;
-    hideAllLabelMeshes();
-    showSelectedLabelMeshes(selectedArray); // non await: costruzione in background
+    filtered = filterLabels(selectedArray);
   }
-}
+
+  textureL.image.data.set(filtered);
+  textureL.needsUpdate = true;
+  labelBox.visible = selectedArray.length > 0;
+} 
+
+
+gui.add(uniforms['u_renderthreshold'], 'value', 0.0, 1.0).step(0.01).name('Render Style').onChange(function (value) {
+  uniforms['u_renderthreshold'].value = value;
+});
+
+
+gui.add(params, 'showRawVolume').name('RAW Volume').onChange((value) => {
+  box.visible = value;
+});
+
+
+const controllers = {};
+groupNames.forEach(groupName => {
+  controllers[groupName] = gui.add(params, groupName).name(groupName).onChange(() => {
+    updateLabelSelection();
+  });
+});
+
+
+const actions = {
+  toggleAll: () => {
+    const anyOff = groupNames.some(n => !params[n]);
+    groupNames.forEach(n => {
+      params[n] = anyOff;
+      if (controllers[n]) controllers[n].setValue(anyOff);
+      const dom = controllers[n]?.domElement;
+      if (dom) {
+        const input = dom.querySelector('input[type="checkbox"]');
+        if (input) input.checked = anyOff;
+      }
+    });
+    updateLabelSelection();
+  }
+};
+
+const actionControllers = {};
+actionControllers.toggleAll = gui.add(actions, 'toggleAll').name('Select / Deselect All');
+
+
 
 
 function animate() {
