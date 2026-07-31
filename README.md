@@ -46,6 +46,8 @@ To run and test the visualizer locally:
 
 ### Prerequisites
 A modern web browser with WebGL support (Chrome, Firefox, Edge, Safari).
+* **Node.js** (v16 or higher)
+* **npm**
 
 ### Running Locally
 
