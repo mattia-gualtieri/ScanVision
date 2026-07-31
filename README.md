@@ -1,4 +1,4 @@
-# 🩺 3D CBCT Volume Visualizer (NRRD)
+# 🩺 CBCT Volume Visualizer (NRRD)
 
 ![Three.js](https://img.shields.io/badge/Three.js-000000?style=for-the-badge&logo=three.js&logoColor=white)
 ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
